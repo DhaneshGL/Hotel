@@ -1,0 +1,68 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Booking {
+  id          Int      @id @default(autoincrement())
+  customerId  Int
+  hostId      Int
+  listingId   Int
+  startDate   String
+  endDate     String
+  totalPrice  Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  customer    User     @relation("CustomerBookings", fields: [customerId], references: [id])
+  host        User     @relation("HostBookings", fields: [hostId], references: [id])
+  listing     Listing  @relation(fields: [listingId], references: [id])
+}
+
+model Listing {
+  id                Int       @id @default(autoincrement())
+  creatorId         Int
+  category          String
+  type              String
+  streetAddress     String
+  aptSuite          String
+  city              String
+  province          String
+  country           String
+  guestCount        Int
+  bedroomCount      Int
+  bedCount          Int
+  bathroomCount     Int
+  amenities         String[]
+  listingPhotoPaths String[]
+  title             String
+  description       String
+  highlight         String
+  highlightDesc     String
+  price             Float
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  creator           User      @relation("createdListings", fields: [creatorId], references: [id])
+  bookings          Booking[]
+}
+
+model User {
+  id               Int       @id @default(autoincrement())
+  firstName        String
+  lastName         String
+  email            String    @unique
+  password         String
+  profileImagePath String?   @default("")
+  tripList         String[]
+  wishList         String[]
+  propertyList     Int[]
+  reservationList  Int[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  createdListings  Listing[] @relation("createdListings")
+  customerBookings Booking[] @relation("CustomerBookings")
+  hostBookings     Booking[] @relation("HostBookings")
+}
