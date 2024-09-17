@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: dain4/e-wallet-frontend:latest
+    container_name: e-wallet-frontend
+    ports:
+      - '3000:3000'
+    environment:
+      REACT_APP_SERVER: http://localhost:8080/api/v1
+    networks:
+      - ew-network
+
+  backend:
+    image: dain4/e-wallet-backend:latest
+    container_name: e-wallet-backend
+    ports:
+      - '8080:8080'
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/e_wallet
+      DB_USERNAME: postgres
+      DB_PASSWORD: dain
+      JWT_SECRET: appSecretKey
+      JWT_EXPIRATION_MS: 3600000
+
+    depends_on:
+      - db
+    networks:
+      - ew-network
+
+  db:
+    image: postgres:14.6-alpine
+    container_name: e-wallet-db
+    environment:
+      - POSTGRES_DB=e_wallet
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=dain
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - ew-network
+
+networks:
+  ew-network:
+    driver: bridge
+
+volumes:
+  db-data:
+    driver: local
